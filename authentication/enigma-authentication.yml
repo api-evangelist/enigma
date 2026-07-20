@@ -1,0 +1,31 @@
+generated: '2026-07-19'
+method: searched
+source: https://documentation.enigma.com/guides/graphql/api
+docs: https://documentation.enigma.com/
+summary:
+  types:
+  - apiKey
+  - oauth2
+  api_key_in:
+  - header
+  oauth2_flows:
+  - authorizationCode
+schemes:
+- name: apiKey
+  type: apiKey
+  in: header
+  parameter_name: x-api-key
+  applies_to:
+  - Enigma GraphQL Data API (https://api.enigma.com/graphql)
+  - Enigma KYB REST API (https://api.enigma.com/v2/kyb/)
+  notes: >-
+    Each request must include the x-api-key header with your API key. Keys are managed
+    via the Enigma Console (https://console.enigma.com/) or an account representative.
+- name: oauth2
+  type: oauth2
+  version: '2.1'
+  applies_to:
+  - Enigma MCP server (https://mcp.enigma.com/mcp)
+  notes: >-
+    The remote MCP server authenticates with OAuth 2.1 and enforces OAuth-scoped access
+    to Enigma tools; scope reference is not publicly documented.
