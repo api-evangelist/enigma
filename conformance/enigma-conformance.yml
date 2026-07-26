@@ -1,0 +1,35 @@
+generated: '2026-07-19'
+method: searched
+source: https://www.enigma.com/legal/security
+docs: https://documentation.enigma.com/
+standards:
+- id: soc2-type2
+  conforms: true
+  evidence: >-
+    Enigma holds SOC 2 Type 2 (Security, Availability, and Confidentiality trust services
+    criteria) per https://www.enigma.com/legal/security
+- id: graphql-spec
+  conforms: true
+  evidence: >-
+    GraphQL Data API is "Standard GraphQL conforming to the GraphQL Specification" per the
+    GraphQL guide
+- id: oauth2
+  conforms: true
+  evidence: Remote MCP server authenticates with OAuth 2.1
+- id: rfc9116-security-txt
+  conforms: true
+  evidence: /.well-known/security.txt published with Contact, Policy, Expires, Canonical
+- id: cursor-pagination
+  conforms: true
+  evidence: GraphQL connections use Relay-style first/after/pageInfo cursor pagination
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: REST/GraphQL errors do not use application/problem+json
+- id: iso-27001
+  conforms: false
+  evidence: not published on the security page
+- id: pci-dss
+  conforms: false
+  evidence: not published
+compliance_programs:
+- SOC 2 Type 2

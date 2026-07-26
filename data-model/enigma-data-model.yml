@@ -1,0 +1,73 @@
+generated: '2026-07-19'
+method: searched
+source: https://documentation.enigma.com/reference/graphql_api/
+docs: llms/enigma-llms.txt
+description: >-
+  Entity-relationship graph of Enigma's Identity Graph, derived from the documented GraphQL
+  schema (three core entity types linked by Relay-style connection fields).
+entities:
+- name: BRAND
+  id: UUID
+  description: A customer-facing business identity (e.g. "Starbucks").
+  scalars: [id, internalId, enigmaId]
+- name: OPERATING_LOCATION
+  id: UUID
+  description: A physical business location with an address.
+  scalars: [id, internalId, enigmaId]
+- name: LEGAL_ENTITY
+  id: UUID
+  description: A U.S. government-recognized business registration (corporation, LLC, etc.).
+  scalars: [id, internalId, enigmaId]
+relationships:
+- from: BRAND
+  to: OPERATING_LOCATION
+  kind: has_many
+  via: operatingLocations
+- from: BRAND
+  to: LEGAL_ENTITY
+  kind: has_many
+  via: legalEntities
+- from: BRAND
+  to: BRAND
+  kind: has_many
+  via: affiliatedBrands
+- from: BRAND
+  to: CardTransaction
+  kind: has_many
+  via: cardTransactions
+- from: BRAND
+  to: Industry
+  kind: has_many
+  via: industries
+- from: OPERATING_LOCATION
+  to: BRAND
+  kind: has_many
+  via: brands
+- from: OPERATING_LOCATION
+  to: LEGAL_ENTITY
+  kind: has_many
+  via: legalEntities
+- from: OPERATING_LOCATION
+  to: Person
+  kind: has_many
+  via: roles
+- from: LEGAL_ENTITY
+  to: BRAND
+  kind: has_many
+  via: brands
+- from: LEGAL_ENTITY
+  to: Person
+  kind: has_many
+  via: persons
+- from: LEGAL_ENTITY
+  to: OPERATING_LOCATION
+  kind: has_many
+  via: operatingLocations
+- from: LEGAL_ENTITY
+  to: WatchlistEntry
+  kind: has_many
+  via: watchlistEntries
+- from: LEGAL_ENTITY
+  to: TIN
+  kind: has_many
+  via: tins

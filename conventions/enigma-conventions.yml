@@ -1,0 +1,42 @@
+generated: '2026-07-19'
+method: searched
+source: https://documentation.enigma.com/guides/graphql/api
+docs: https://documentation.enigma.com/
+authentication:
+  style: api-key-header
+  header: x-api-key
+  see: authentication/enigma-authentication.yml
+pagination:
+  graphql:
+    style: cursor
+    params: [first, last, after, before]
+    response_fields: [pageInfo.hasNextPage, pageInfo.endCursor]
+    note: Relay-style connection pagination on every connection field
+  graphql_conditions:
+    style: offset
+    params: [limit, pageToken]
+    note: >-
+      Top-level search conditions also accept limit and a numeric pageToken (offset as a
+      string) plus orderBy [field ASC|DESC]
+idempotency:
+  supported: false
+  note: No idempotency-key header is documented for the GraphQL or KYB APIs.
+versioning:
+  scheme: uri-path
+  graphql: unversioned single endpoint (/graphql, graph-model-1)
+  kyb: v2 (/v2/kyb/)
+error_envelope:
+  graphql:
+    shape: GraphQL errors[] array alongside partial data (per the GraphQL Specification)
+  kyb:
+    shape: HTTP status code + JSON body
+  see: errors/enigma-problem-types.yml
+rate_limits:
+  signaling: not-documented
+  note: "Docs state \"Rate limits apply per API key\" but do not publish headers or quotas."
+matching:
+  match_threshold:
+    range: 0.0-1.0
+    note: minimum-confidence filter on GraphQL search and KYB requests
+  kyb_packages: [identify, verify]
+  kyb_addons: [tin_verification, watchlist_ofac_screening, ssn_verification]

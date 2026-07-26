@@ -1,0 +1,23 @@
+generated: '2026-07-19'
+method: searched
+source: https://documentation.enigma.com/
+status_page: https://status.enigma.com/
+versioning:
+  graphql:
+    scheme: unversioned
+    model: graph-model-1
+    endpoint: https://api.enigma.com/graphql
+  kyb:
+    scheme: uri-path
+    current: v2
+    endpoint: https://api.enigma.com/v2/kyb/
+deprecation:
+  policy_url: null
+  sunset_header: false
+  note: No public deprecation policy or RFC 8594 Sunset/Deprecation header support documented.
+sla:
+  url: null
+  note: No public SLA / uptime target published; availability is tracked on the status page.
+support:
+  email: support@enigma.com
+  url: https://www.enigma.com/company/support

@@ -1,8 +1,13 @@
 aid: enigma
 name: Enigma
-description: Enigma is a company surfaced as a portfolio company of insight-partners, pantera-capital
-  and added to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the
-  enrichment pipeline.
+description: >-
+  Enigma provides business identity infrastructure for the United States, built on
+  entity-resolution technology that links brands, DBAs, operating locations, legal
+  entities, and ownership into unified business records. Its Identity Graph aggregates
+  hundreds of public and third-party sources plus 750M+ anonymized cards and 30B+ annual
+  transactions, powering KYB and onboarding, sanctions and negative-news screening,
+  payment risk and underwriting, and go-to-market data. Developers access this through a
+  GraphQL Data API, a KYB REST API, and a remote MCP server.
 url: https://raw.githubusercontent.com/api-evangelist/enigma/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -11,17 +16,126 @@ x-backed-by:
 - pantera-capital
 x-tier: stub
 x-tier-reason: portfolio-lead
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://www.enigma.com/favicon.ico
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-19'
 tags:
 - Company
-apis: []
+- Business Data
+- Identity Resolution
+- KYB
+- Compliance
+- Fraud
+- GraphQL
+- Data Enrichment
+- Financial Services
+- MCP
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+apis:
+- name: Enigma GraphQL Data API
+  description: >-
+    GraphQL API for querying Enigma business data — brands, operating locations, legal
+    entities, card transactions, and industries — with text, lookup, natural-language
+    prompt, and async segmentation search patterns over the Identity Graph.
+  humanURL: https://documentation.enigma.com/guides/graphql/api
+  baseURL: https://api.enigma.com/graphql
+  tags:
+  - GraphQL
+  - Business Data
+  - Identity Resolution
+  properties:
+  - type: APIReference
+    url: https://documentation.enigma.com/reference/graphql_api/
+  - type: GettingStarted
+    url: https://documentation.enigma.com/guides/graphql/api
+- name: Enigma KYB REST API
+  description: >-
+    REST API for business identity verification and compliance — identify and verify
+    packages with TIN/EIN verification, OFAC watchlist screening, and SSN verification
+    add-on tasks.
+  humanURL: https://documentation.enigma.com/docs/kyb-api-quickstart
+  baseURL: https://api.enigma.com/v2/kyb/
+  tags:
+  - KYB
+  - Compliance
+  - Screening
+  properties:
+  - type: GettingStarted
+    url: https://documentation.enigma.com/docs/kyb-api-quickstart
 common:
 - type: Website
-  url: https://www.enigma.co/
+  url: https://www.enigma.com/
+- type: DeveloperPortal
+  url: https://documentation.enigma.com/
+- type: Documentation
+  url: https://documentation.enigma.com/
+- type: APIReference
+  url: https://documentation.enigma.com/reference/graphql_api/
+- type: GettingStarted
+  url: https://documentation.enigma.com/getting_started/overview
+- type: Pricing
+  url: https://www.enigma.com/pricing
+- type: Blog
+  url: https://www.enigma.com/resources/blog
+- type: Support
+  url: https://www.enigma.com/company/support
+- type: SignUp
+  url: https://console.enigma.com/
+- type: Login
+  url: https://console.enigma.com/
+- type: PrivacyPolicy
+  url: https://www.enigma.com/company/privacy-policy
+- type: TermsOfService
+  url: https://www.enigma.com/legal/terms-of-service
+- type: StatusPage
+  url: https://status.enigma.com/
+- type: Compliance
+  url: https://www.enigma.com/legal/security
+- type: MCPServer
+  url: mcp/enigma-mcp.yml
+- type: LLMsTxt
+  url: llms/enigma-llms.txt
+- type: WellKnown
+  url: well-known/enigma-well-known.yml
+- type: SecurityTxt
+  url: well-known/enigma-security.txt
+- type: Authentication
+  url: authentication/enigma-authentication.yml
+- type: VulnerabilityDisclosure
+  url: security/enigma-vulnerability-disclosure.yml
+- type: Security
+  url: https://www.enigma.com/legal/security
+- type: DomainSecurity
+  url: security/enigma-domain-security.yml
+- type: Conventions
+  url: conventions/enigma-conventions.yml
+- type: Conformance
+  url: conformance/enigma-conformance.yml
+- type: ErrorCatalog
+  url: errors/enigma-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/enigma-lifecycle.yml
+- type: DataModel
+  url: data-model/enigma-data-model.yml
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence

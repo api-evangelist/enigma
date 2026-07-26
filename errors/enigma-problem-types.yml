@@ -1,0 +1,39 @@
+generated: '2026-07-19'
+method: derived
+source: https://documentation.enigma.com/guides/graphql/api
+docs: https://documentation.enigma.com/reference/response-status-codes
+format: graphql-errors + http-status
+note: >-
+  Enigma publishes a "Response Status Codes" reference page, but its content is served by a
+  Docusaurus SPA and was not machine-readable at harvest time. The entries below are
+  derived from the documented request/response conventions (x-api-key auth, GraphQL error
+  envelope, per-key rate limits). Titles/remediation should be upgraded from the docs page
+  on a later pass.
+envelopes:
+- api: GraphQL Data API
+  shape: >-
+    GraphQL Specification errors[] array (each with message and optional extensions)
+    returned alongside any partial data field
+- api: KYB REST API
+  shape: HTTP status code with a JSON body
+problems:
+- status: 200
+  title: OK
+  detail: Request succeeded; GraphQL responses may still carry errors[] with partial data.
+- status: 400
+  title: Bad Request
+  detail: >-
+    Malformed query or invalid input (e.g. GraphQL search missing id/name/website, or a KYB
+    request without at least two of name/address/person).
+- status: 401
+  title: Unauthorized
+  detail: Missing or invalid x-api-key header.
+- status: 403
+  title: Forbidden
+  detail: API key lacks access to the requested package, attribute, or dataset.
+- status: 429
+  title: Too Many Requests
+  detail: Per-API-key rate limit exceeded.
+- status: 500
+  title: Internal Server Error
+  detail: Unexpected server-side error.

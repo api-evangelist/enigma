@@ -1,0 +1,23 @@
+generated: '2026-07-19'
+method: searched
+source: https://www.enigma.com/.well-known/
+host: https://www.enigma.com
+documents:
+- path: /.well-known/security.txt
+  status: 200
+  file: enigma-security.txt
+- path: /.well-known/mcp/server-card.json
+  status: 200
+  file: ../mcp/enigma-mcp-server-card.json
+- path: /.well-known/openid-configuration
+  status: 404
+- path: /.well-known/oauth-authorization-server
+  status: 404
+- path: /.well-known/api-catalog
+  status: 404
+- path: /.well-known/ai-plugin.json
+  status: 404
+notes: >-
+  documentation.enigma.com is a Docusaurus SPA that returns 200 (text/html shell) for
+  every /.well-known/* path; those are catch-all responses, not real discovery documents,
+  and are excluded here. api.enigma.com 302-redirects all /.well-known/* requests.

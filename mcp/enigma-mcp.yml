@@ -1,0 +1,28 @@
+generated: '2026-07-19'
+method: searched
+status: published
+source: https://www.enigma.com/.well-known/mcp/server-card.json
+docs: https://documentation.enigma.com/guides/ai-mcp
+server:
+  name: com.enigma/enigma-mcp
+  title: Enigma MCP
+  version: '1.0.0'
+  transport: streamable-http
+  url: https://mcp.enigma.com/mcp
+  auth: oauth2.1
+  card: mcp/enigma-mcp-server-card.json
+  description: >-
+    Remote MCP server for U.S. business intelligence: entity resolution, KYB verification,
+    sanctions and negative-news screening, card-transaction analytics, and public-records
+    search. Returns structured entity data rather than web content and handles entity
+    resolution server-side under OAuth-scoped access.
+capabilities:
+- business identity resolution
+- KYB verification
+- sanctions and negative-news screening
+- card-transaction analytics
+- public-records search
+clients:
+- Claude
+- ChatGPT
+- Cursor
