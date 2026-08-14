@@ -7,7 +7,9 @@ description: >-
   hundreds of public and third-party sources plus 750M+ anonymized cards and 30B+ annual
   transactions, powering KYB and onboarding, sanctions and negative-news screening,
   payment risk and underwriting, and go-to-market data. Developers access this through a
-  GraphQL Data API, a KYB REST API, and a remote MCP server.
+  GraphQL Data API, a KYB v2 REST API, a sanctions Screening REST API, and a remote MCP
+  server exposing sixteen published tools under OAuth 2.1. Enigma also publishes its own
+  Agent Skills as a Claude Code plugin, an llms.txt, and hard plan-tiered rate limits.
 url: https://raw.githubusercontent.com/api-evangelist/enigma/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -17,21 +19,26 @@ x-backed-by:
 x-tier: stub
 x-tier-reason: portfolio-lead
 accessModel:
-  pricing: unknown
+  pricing: published
   onboarding: self-serve
   trial: false
-  try_now: false
-  public: false
-  label: Self-serve signup
-  confidence: medium
+  try_now: true
+  public: true
+  label: Free tier, self-serve paid plans from $20/month
+  confidence: high
   source:
-  - authentication
-  generated: '2026-07-22'
-  method: derived
+  - https://www.enigma.com/pricing
+  - plans/enigma-plans-pricing.yml
+  generated: '2026-08-14'
+  method: searched
+  note: >-
+    Published four-tier credit-metered pricing (Free $0 / Pro $20 / Max $200 /
+    Enterprise custom) with a full public rate card. API access starts at Pro; MCP access
+    at Max. Free trials ended 2026-08-31 and were replaced by the permanent Free tier.
 image: https://www.enigma.com/favicon.ico
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-19'
+modified: '2026-08-14'
 tags:
 - Company
 - Business Data
@@ -43,6 +50,8 @@ tags:
 - Data Enrichment
 - Financial Services
 - MCP
+- Sanctions Screening
+- Agent Skills
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -65,12 +74,17 @@ apis:
     url: https://documentation.enigma.com/reference/graphql_api/
   - type: GettingStarted
     url: https://documentation.enigma.com/guides/graphql/api
+  - type: GraphQL
+    url: graphql/enigma-graphql-surface.yml
+  - type: AgentSkill
+    url: skills/enigma-graphql.md
 - name: Enigma KYB REST API
   description: >-
     REST API for business identity verification and compliance — identify and verify
     packages with TIN/EIN verification, OFAC watchlist screening, and SSN verification
-    add-on tasks.
-  humanURL: https://documentation.enigma.com/docs/kyb-api-quickstart
+    add-on tasks. A /v2/kyb-legacy/ endpoint returns the v1 response shape over v2 data
+    for integrations that cannot migrate.
+  humanURL: https://documentation.enigma.com/kyb
   baseURL: https://api.enigma.com/v2/kyb/
   tags:
   - KYB
@@ -78,8 +92,34 @@ apis:
   - Screening
   properties:
   - type: GettingStarted
-    url: https://documentation.enigma.com/docs/kyb-api-quickstart
+    url: https://documentation.enigma.com/kyb/verify-identity
+  - type: Documentation
+    url: https://documentation.enigma.com/kyb
+  - type: AgentSkill
+    url: skills/enigma-kyb.md
+- name: Enigma Screening API
+  description: >-
+    REST API for sanctions and watchlist screening of customers and transactions.
+    Weighted-attribute ENTITY screening and unstructured TEXT screening, plus
+    LLM-enhanced variants that add live web search; watchlist view discovery, stored
+    screening configurations, decision/case management, and file-based batch screening.
+  humanURL: https://documentation.enigma.com/screening/api
+  baseURL: https://api.enigma.com/evaluation/sanctions/
+  tags:
+  - Sanctions Screening
+  - Compliance
+  - AML
+  - OFAC
+  properties:
+  - type: Documentation
+    url: https://documentation.enigma.com/screening/api
+  - type: APIReference
+    url: https://documentation.enigma.com/screening/api/core-endpoints
+  - type: AgentSkill
+    url: skills/enigma-screen.md
 common:
+- type: TrustCenter
+  url: security/enigma-trust-center.yml
 - type: Website
   url: https://www.enigma.com/
 - type: DeveloperPortal
@@ -89,7 +129,9 @@ common:
 - type: APIReference
   url: https://documentation.enigma.com/reference/graphql_api/
 - type: GettingStarted
-  url: https://documentation.enigma.com/getting_started/overview
+  url: https://documentation.enigma.com/guides/graphql/api
+- type: GitHubOrganization
+  url: https://github.com/enigma-io
 - type: Pricing
   url: https://www.enigma.com/pricing
 - type: Blog
@@ -134,8 +176,26 @@ common:
   url: lifecycle/enigma-lifecycle.yml
 - type: DataModel
   url: data-model/enigma-data-model.yml
+- type: ToolCrosswalk
+  url: mcp/enigma-tool-crosswalk.yml
+- type: GraphQL
+  url: graphql/enigma-graphql-surface.yml
+- type: OAuthScopes
+  url: scopes/enigma-scopes.yml
+- type: Packages
+  url: packages/enigma-packages.yml
+- type: RateLimits
+  url: rate-limits/enigma-rate-limits.yml
+- type: Plans
+  url: plans/enigma-plans-pricing.yml
+- type: Sandbox
+  url: sandbox/enigma-sandbox.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: ContentSignal
+  url: well-known/enigma-robots.txt
 x-enrichment:
-  date: '2026-07-19'
-  status: backfilled
+  date: '2026-08-14'
+  status: enriched
+  artifacts_added: 16
   pass: local-v1
-  note: backfilled from .gitignore signal + verified work evidence
