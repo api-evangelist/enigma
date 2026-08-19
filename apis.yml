@@ -36,7 +36,7 @@ accessModel:
     Enterprise custom) with a full public rate card. API access starts at Pro; MCP access
     at Max. Free trials ended 2026-08-31 and were replaced by the permanent Free tier.
 image: https://www.enigma.com/favicon.ico
-specificationVersion: '0.20'
+specificationVersion: '0.23'
 created: '2026-07-17'
 modified: '2026-08-14'
 tags:
