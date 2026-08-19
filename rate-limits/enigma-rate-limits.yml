@@ -1,0 +1,114 @@
+generated: '2026-08-14'
+method: searched
+source: https://documentation.enigma.com/resources/rate-limits
+docs: https://documentation.enigma.com/resources/rate-limits
+docs_last_updated: '2026-07-22'
+limit_count: 14
+summary: >-
+  Enigma publishes hard, plan-tiered rate limits for the GraphQL Data API and per-tool
+  daily/monthly limits for every MCP tool. KYB API limits are contract-specific and not
+  published. Exhaustion returns 429 with a Retry-After header carrying the number of
+  seconds to wait.
+signaling:
+  status_code: 429
+  status_text: Slow Down
+  headers:
+  - name: Retry-After
+    description: >-
+      Seconds to wait before retrying. Published as present on EVERY 429. Docs instruct
+      clients to treat it as a minimum wait, not a suggestion.
+    required_by_docs: true
+  observed_headers_on_unauthenticated_call: []
+  observed_note: >-
+    An unauthenticated POST to https://api.enigma.com/graphql returns 401 with no
+    RateLimit-*/X-RateLimit-* headers, so the runtime quota signal could not be observed
+    anonymously; only the documented Retry-After behavior on 429 is recorded here.
+  retry_guidance: >-
+    KYB: exponential backoff starting at 1 second, doubling each retry, capped at 60
+    seconds. GraphQL/MCP: honor Retry-After, then back off further on repeated 429s.
+limits:
+- api: Enigma GraphQL Data API
+  plan: Trial
+  scope: per-account-plan
+  window: 1s
+  limit: 10
+  unit: requests-per-second
+  burst: 20
+  daily_limit: 100000
+- api: Enigma GraphQL Data API
+  plan: Pro
+  scope: per-account-plan
+  window: 1s
+  limit: 50
+  unit: requests-per-second
+  burst: 100
+  daily_limit: 500000
+- api: Enigma GraphQL Data API
+  plan: Max
+  scope: per-account-plan
+  window: 1s
+  limit: 50
+  unit: requests-per-second
+  burst: 100
+  daily_limit: 500000
+- api: Enigma GraphQL Data API
+  plan: Enterprise
+  scope: per-account-plan
+  window: 1s
+  limit: 100
+  unit: requests-per-second
+  burst: 200
+  daily_limit: null
+  note: No daily limit on Enterprise.
+- api: Enigma KYB REST API
+  plan: all
+  scope: per-account-contract
+  limit: null
+  note: >-
+    "KYB API rate limits vary by plan and contract. Contact Enigma support to confirm the
+    limits for your account." Not published.
+mcp_tool_limits:
+  applies_to_plans: [Pro, Max]
+  window_daily: rolling-24h
+  window_monthly: rolling-30d
+  independent_per_tool: true
+  status_on_exhaustion: 429
+  note: Enterprise MCP tool limits are configurable per organization and not published.
+  tools:
+  - tool: search_business
+    daily: 500
+    monthly: 8000
+  - tool: search_person
+    daily: 500
+    monthly: 8000
+  - tool: get_brand_locations
+    daily: 500
+    monthly: 8000
+  - tool: get_brand_legal_entities
+    daily: 500
+    monthly: 8000
+  - tool: get_brand_card_analytics
+    daily: 500
+    monthly: 8000
+  - tool: search_gov_archive
+    daily: 500
+    monthly: 6000
+  - tool: generate_brands_segment
+    daily: 100
+    monthly: 1000
+  - tool: generate_locations_segment
+    daily: 100
+    monthly: 1000
+  - tool: search_kyb
+    daily: 100
+    monthly: 2000
+  - tool: search_negative_news
+    daily: 100
+    monthly: 2000
+notes:
+- All query types count toward the GraphQL rate limit regardless of shape.
+- A 429 can come from the per-second, burst, or daily limit; the docs tell clients to
+  check which before retrying in a loop.
+see_also:
+- plans/enigma-plans-pricing.yml
+- conventions/enigma-conventions.yml

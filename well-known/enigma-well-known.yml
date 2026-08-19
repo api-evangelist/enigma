@@ -1,23 +1,105 @@
-generated: '2026-07-19'
+generated: '2026-08-14'
 method: searched
-source: https://www.enigma.com/.well-known/
-host: https://www.enigma.com
+source: https://www.enigma.com/.well-known/ and https://mcp.enigma.com/.well-known/
+hosts_probed:
+- https://www.enigma.com
+- https://api.enigma.com
+- https://mcp.enigma.com
+- https://documentation.enigma.com
+- https://console.enigma.com
+- https://oauth.enigma.com
 documents:
-- path: /.well-known/security.txt
+- host: https://www.enigma.com
+  path: /.well-known/security.txt
   status: 200
+  content_type: text/plain
   file: enigma-security.txt
-- path: /.well-known/mcp/server-card.json
+  real_document: true
+- host: https://www.enigma.com
+  path: /.well-known/mcp/server-card.json
   status: 200
+  content_type: application/json
   file: ../mcp/enigma-mcp-server-card.json
-- path: /.well-known/openid-configuration
+  real_document: true
+- host: https://mcp.enigma.com
+  path: /.well-known/oauth-authorization-server
+  status: 200
+  content_type: application/json
+  file: enigma-mcp-oauth-authorization-server.json
+  real_document: true
+  spec: RFC 8414
+- host: https://mcp.enigma.com
+  path: /.well-known/oauth-protected-resource
+  status: 200
+  content_type: application/json
+  file: enigma-mcp-oauth-protected-resource.json
+  real_document: true
+  spec: RFC 9728
+- host: https://oauth.enigma.com
+  path: /.well-known/oauth-authorization-server
+  status: 200
+  content_type: application/json
+  real_document: true
+  note: Identical body to the mcp.enigma.com copy; not saved twice.
+- host: https://mcp.enigma.com
+  path: /.well-known/openid-configuration
   status: 404
-- path: /.well-known/oauth-authorization-server
+- host: https://mcp.enigma.com
+  path: /.well-known/agent-card.json
   status: 404
-- path: /.well-known/api-catalog
+- host: https://mcp.enigma.com
+  path: /.well-known/agent.json
   status: 404
-- path: /.well-known/ai-plugin.json
+- host: https://www.enigma.com
+  path: /.well-known/openid-configuration
   status: 404
+- host: https://www.enigma.com
+  path: /.well-known/oauth-authorization-server
+  status: 404
+- host: https://www.enigma.com
+  path: /.well-known/api-catalog
+  status: 404
+- host: https://www.enigma.com
+  path: /.well-known/ai-plugin.json
+  status: 404
+- host: https://www.enigma.com
+  path: /.well-known/agent-card.json
+  status: 404
+- host: https://www.enigma.com
+  path: /.well-known/agent.json
+  status: 404
+other_discovery_documents:
+- host: https://www.enigma.com
+  path: /llms.txt
+  status: 200
+  content_type: text/plain
+  file: ../llms/enigma-llms.txt
+  real_document: true
+  note: >-
+    Byte-identical to the copy in llms/ — verified 2026-08-14 (19,025 bytes both sides).
+    Provider-authored, saved verbatim.
+- host: https://www.enigma.com
+  path: /robots.txt
+  status: 200
+  content_type: text/plain
+  file: enigma-robots.txt
+  real_document: true
+  note: >-
+    Carries a Content-Signal declaration — "ai-train=yes, search=yes, ai-input=yes" — an
+    explicit machine-readable AI usage grant rather than the more common blanket
+    disallow. Recorded because it is a published consent signal, not merely a crawl rule.
+- host: https://status.enigma.com
+  path: /api/v2/summary.json
+  status: 200
+  content_type: application/json
+  real_document: true
+  note: >-
+    Atlassian Statuspage JSON API. Nine named components: Console, GraphQL API, Business
+    API, Screen API, KYB Service v1, KYB Service v2, TIN Verification, Watchlist
+    Screening, MCP.
 notes: >-
-  documentation.enigma.com is a Docusaurus SPA that returns 200 (text/html shell) for
-  every /.well-known/* path; those are catch-all responses, not real discovery documents,
-  and are excluded here. api.enigma.com 302-redirects all /.well-known/* requests.
+  api.enigma.com and documentation.enigma.com both answer 200 with the same Docusaurus
+  HTML shell for EVERY unknown path, including every /.well-known/* path and every
+  /openapi.json-style path. Those 200s are catch-all responses, not documents, and are
+  recorded as misses. console.enigma.com does the same with its own SPA shell.
+  www.enigma.com returns a real 404 page for unknown paths.

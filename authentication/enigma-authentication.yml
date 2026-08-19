@@ -1,7 +1,10 @@
-generated: '2026-07-19'
+generated: '2026-08-14'
 method: searched
 source: https://documentation.enigma.com/guides/graphql/api
-docs: https://documentation.enigma.com/
+docs:
+- https://documentation.enigma.com/guides/graphql/api
+- https://documentation.enigma.com/screening/api
+- https://documentation.enigma.com/guides/ai-mcp
 summary:
   types:
   - apiKey
@@ -10,6 +13,10 @@ summary:
   - header
   oauth2_flows:
   - authorizationCode
+  note: >-
+    Two disjoint models: a static API key for all three HTTP APIs, and OAuth 2.1 for the
+    remote MCP server. There is no way to call the HTTP APIs with an OAuth token, and no
+    way to call MCP with an API key.
 schemes:
 - name: apiKey
   type: apiKey
@@ -18,14 +25,64 @@ schemes:
   applies_to:
   - Enigma GraphQL Data API (https://api.enigma.com/graphql)
   - Enigma KYB REST API (https://api.enigma.com/v2/kyb/)
+  - Enigma Screening API (https://api.enigma.com/evaluation/sanctions/)
+  observed_401:
+    graphql: '{"error_message":"Missing or invalid API key","error_code":"UNAUTHORIZED","retryable":false}'
+    kyb: '{"error":true,"message":"Unauthorized"}'
+    observed_at: '2026-08-14'
   notes: >-
-    Each request must include the x-api-key header with your API key. Keys are managed
-    via the Enigma Console (https://console.enigma.com/) or an account representative.
+    Each request must include the x-api-key header. Keys are managed via the Enigma
+    Console (https://console.enigma.com/) or an account representative. There is no test
+    key, no key prefix convention, and no documented rotation or expiry policy.
+- name: accountName
+  type: apiKey
+  in: header
+  parameter_name: Account-Name
+  applies_to:
+  - Enigma Screening API (https://api.enigma.com/evaluation/sanctions/)
+  required: true
+  notes: >-
+    The Screening API requires a second header, Account-Name, alongside x-api-key on every
+    documented request. The GraphQL and KYB APIs do not.
 - name: oauth2
   type: oauth2
   version: '2.1'
   applies_to:
   - Enigma MCP server (https://mcp.enigma.com/mcp)
+  issuer: https://oauth.enigma.com
+  identity_provider: Amazon Cognito (us-east-1_00OC0VOa2)
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://oauth.enigma.com/authorize
+    tokenUrl: https://oauth.enigma.com/token
+    pkce: S256 (required)
+  grant_types: [authorization_code, refresh_token]
+  token_endpoint_auth_methods: [client_secret_basic]
+  dynamic_client_registration: https://oauth.enigma.com/register
+  revocation_endpoint: https://oauth.enigma.com/revoke
+  introspection_endpoint: https://oauth.enigma.com/introspect
+  jwks_uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_00OC0VOa2/.well-known/jwks.json
+  scopes: [openid]
+  discovery:
+    authorization_server_metadata: https://mcp.enigma.com/.well-known/oauth-authorization-server
+    protected_resource_metadata: https://mcp.enigma.com/.well-known/oauth-protected-resource
+    openid_configuration: null
   notes: >-
-    The remote MCP server authenticates with OAuth 2.1 and enforces OAuth-scoped access
-    to Enigma tools; scope reference is not publicly documented.
+    Discovery is fully machine-readable and RFC-conformant: an unauthenticated call gets a
+    401 with WWW-Authenticate naming the protected-resource document, which names the
+    authorization server, which advertises registration/authorize/token/revoke/introspect.
+    An agent can complete the whole handshake without reading a docs page. Scope
+    granularity is the weak point — only `openid` is advertised, so entitlement is
+    enforced by plan and per-tool rate limit rather than by scope.
+  see: scopes/enigma-scopes.yml
+sso:
+  console: https://documentation.enigma.com/console/sso-configuration
+  note: The Enigma Console supports customer SSO configuration (documented; provider-side setup).
+x-evidence:
+  fetched: '2026-08-14'
+  probes:
+  - {url: 'https://api.enigma.com/graphql', method: POST, http_status: 401}
+  - {url: 'https://api.enigma.com/v2/kyb/', method: POST, http_status: 401}
+  - {url: 'https://mcp.enigma.com/mcp', method: POST, http_status: 401}
+  - {url: 'https://mcp.enigma.com/.well-known/oauth-authorization-server', http_status: 200}
+  - {url: 'https://mcp.enigma.com/.well-known/oauth-protected-resource', http_status: 200}

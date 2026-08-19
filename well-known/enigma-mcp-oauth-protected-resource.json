@@ -1,0 +1,6 @@
+{
+    "authorization_servers": [
+        "https://oauth.enigma.com"
+    ],
+    "resource": "https://mcp.enigma.com/http"
+}

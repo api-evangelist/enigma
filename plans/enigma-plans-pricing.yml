@@ -1,0 +1,128 @@
+generated: '2026-08-14'
+method: searched
+source: https://www.enigma.com/pricing
+docs: https://www.enigma.com/pricing
+plan_count: 4
+currency: USD
+model: credit-metered
+credit_unit:
+  credits_per_usd: 100
+  note: 1 credit = 1 cent. Every published rate converts directly to U.S. dollars.
+billing_rules:
+- Charges apply to returned fills; an empty field costs nothing.
+- KYB packages bill when a business matches; screening checks bill per request.
+- Segment filters bill per entity on the list; attributes bill per returned fill.
+- Included monthly credits reset on the account's monthly billing date and do not roll over.
+- Prepaid credit bundles run $100–$1,000 and earn up to 25% bonus credits; extra credits
+  last one year and require no plan change.
+- Usage beyond included credits continues at the published retail rate.
+plans:
+- name: Free
+  price: 0
+  currency: USD
+  period: month
+  included_credits: 0
+  features:
+  - Console access
+  - Viewing, search, and live summaries
+  - Standard rate limits
+  api_access: false
+  note: Browse, search, and preview at no cost. No credits needed.
+- name: Pro
+  price: 20
+  currency: USD
+  period: month
+  included_credits: 2100
+  included_value_usd: 21.00
+  features:
+  - Segment building
+  - File enrichment
+  - API access
+  api_access: true
+  mcp_access: false
+- name: Max
+  price: 200
+  currency: USD
+  period: month
+  included_credits: 25000
+  included_value_usd: 250.00
+  features:
+  - Everything in Pro
+  - MCP access
+  - AI integration access
+  api_access: true
+  mcp_access: true
+  note: Marked "Most used" on the pricing page.
+- name: Enterprise
+  price: null
+  price_label: Custom
+  currency: USD
+  period: custom
+  included_credits: null
+  features:
+  - Negotiated rate-card discounts
+  - Custom attributes and targeting
+  - Custom file delivery and integrations
+  - Contract SLA and dedicated support
+  api_access: true
+  mcp_access: true
+rate_card:
+  kyb_packages:
+  - item: KYB Identify
+    credits: 150
+    usd: 1.50
+    billing: per match
+  - item: KYB Verify
+    credits: 250
+    usd: 2.50
+    billing: per match
+  screening_checks:
+  - item: Watch list
+    credits: 50
+    usd: 0.50
+    billing: per request
+  - item: TIN Verification
+    credits: 100
+    usd: 1.00
+    billing: per request
+  - item: Negative News
+    credits: 10
+    usd: 0.10
+    billing: per request
+  - item: Bankruptcy
+    credits: 10
+    usd: 0.10
+    billing: per request
+  - item: Person Screening
+    credits: 50
+    usd: 0.50
+    billing: per request
+  enrichment_attributes:
+  - {item: Phone number, credits: 1, usd: 0.01, billing: per fill}
+  - {item: Person name, credits: 1, usd: 0.01, billing: per fill}
+  - {item: Address, credits: 2, usd: 0.02, billing: per fill}
+  - {item: Website, credits: 2, usd: 0.02, billing: per fill}
+  - {item: Operating status, credits: 2, usd: 0.02, billing: per fill}
+  - {item: EIN, credits: 3, usd: 0.03, billing: per fill}
+  - {item: Industry, credits: 5, usd: 0.05, billing: per fill}
+  - {item: Registration status, credits: 5, usd: 0.05, billing: per fill}
+  - {item: Person email, credits: 8, usd: 0.08, billing: per fill}
+  - {item: Card revenue, credits: 25, usd: 0.25, billing: per fill}
+  segments:
+    note: >-
+      Filters bill per entity on the generated list (examples published: a state filter
+      10 credits, an industry filter 20 credits, a revenue filter 20 credits per entity);
+      attributes then bill per returned fill as columns.
+transition:
+  effective: '2026-08-10'
+  free_trial_ends: '2026-08-31'
+  note: >-
+    Pricing changed 2026-08-10. Accounts created before that date keep the previous
+    pricing, published for reference; free trials end 2026-08-31 and roll to the Free
+    plan. Pre-change extra credits convert at five new credits per old credit.
+cost_preview:
+  available: true
+  where: Enigma Console segment builder
+  note: Console shows the exact credit and dollar cost before a segment is generated.
+see_also:
+- rate-limits/enigma-rate-limits.yml

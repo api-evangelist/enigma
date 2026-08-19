@@ -1,0 +1,180 @@
+generated: '2026-08-14'
+method: derived
+source: >-
+  mcp/enigma-mcp.yml (published tool list) bound to the documented GraphQL and REST
+  surfaces at documentation.enigma.com — no OpenAPI is published, so REST rows name the
+  documented HTTP method + path rather than an operationId.
+caveat: >-
+  Enigma publishes no OpenAPI, and both live schemas are auth-gated (GraphQL
+  introspection 401 UNAUTHORIZED without x-api-key; MCP tools/list 401 invalid_token).
+  Every binding below is therefore mapped by NAME AND DOCUMENTED SEMANTICS, not by a
+  machine-read schema, and confidence is set accordingly. Nothing here is invented: each
+  tool, GraphQL field and REST path appears in Enigma's own documentation or in its
+  first-party Agent Skills.
+surfaces:
+  openapi: null
+  openapi_note: No OpenAPI/Swagger document is published on any Enigma host (see well-known probe).
+  graphql:
+    endpoint: https://api.enigma.com/graphql
+    reference: https://documentation.enigma.com/reference/graphql_api
+    introspection: gated
+    introspection_evidence: 'POST {__schema{queryType{name}}} -> 401 {"error_code":"UNAUTHORIZED"}'
+    surface_catalog: ../graphql/enigma-graphql-surface.yml
+  rest:
+  - name: KYB v2
+    base: https://api.enigma.com/v2/kyb/
+    reference: https://documentation.enigma.com/kyb
+  - name: Screening
+    base: https://api.enigma.com/evaluation/sanctions/
+    reference: https://documentation.enigma.com/screening/api
+  mcp:
+    url: https://mcp.enigma.com/mcp
+    tools_list: gated
+    tools_list_evidence: 'POST tools/list -> 401 invalid_token (WWW-Authenticate: Bearer)'
+crosswalk:
+- tool: search_business
+  category: business-intelligence
+  graphql: [search]
+  binding: graphql
+  confidence: high
+  note: >-
+    Query.search with searchInput.entityType BRAND and a name; the tool's published
+    outputs (revenue 12m, transaction count, YoY growth, NAICS, technologies, location
+    count, matching brands and legal entities) are exactly the Brand connection fields
+    the enigma-graphql skill queries.
+- tool: search_person
+  category: business-intelligence
+  graphql: [search]
+  binding: graphql
+  confidence: high
+  note: searchInput.person with entityType resolving to the Person member of SearchUnion.
+- tool: get_brand_locations
+  category: business-intelligence
+  graphql: [search]
+  graphql_fields: [Brand.operatingLocations, OperatingLocation.addresses, OperatingLocation.cardTransactions]
+  binding: graphql
+  confidence: high
+- tool: get_brand_card_analytics
+  category: business-intelligence
+  graphql: [search]
+  graphql_fields: [Brand.cardTransactions]
+  binding: graphql
+  confidence: high
+  note: 60-month window is a server-side default; not expressible as a distinct GraphQL field.
+- tool: get_brand_legal_entities
+  category: business-intelligence
+  graphql: [search]
+  graphql_fields: [Brand.legalEntities, LegalEntity.registeredEntities]
+  binding: graphql
+  confidence: high
+- tool: generate_brands_segment
+  category: segmentation
+  graphql: [search]
+  graphql_fields: [SearchInput.output, Query.backgroundTask]
+  binding: graphql
+  confidence: medium
+  note: >-
+    Maps to the async segmentation pattern (searchInput.output filename/format + poll
+    backgroundTask). Inputs are not published for this tool, so the binding is by
+    documented capability only.
+- tool: generate_locations_segment
+  category: segmentation
+  graphql: [search]
+  graphql_fields: [SearchInput.output, Query.backgroundTask]
+  binding: graphql
+  confidence: medium
+- tool: search_kyb
+  category: kyb
+  rest: ['POST /v2/kyb/']
+  binding: rest
+  confidence: high
+  note: >-
+    Published outputs (matching brands and registered entities, address verification,
+    name verification) are the KYB verify package response fields.
+- tool: screen_customer
+  category: screening
+  rest: ['POST /evaluation/sanctions/screen']
+  binding: rest
+  confidence: high
+  note: searches[].type ENTITY with entity_description.person_name/dob/country_of_affiliation.
+- tool: screen_business
+  category: screening
+  rest: ['POST /evaluation/sanctions/screen']
+  binding: rest
+  confidence: high
+  note: searches[].type ENTITY with entity_description.org_name/address/country_of_affiliation.
+- tool: screen_entity_search
+  category: screening
+  rest: ['POST /evaluation/sanctions/entity/{provider}/{collection}/{record_id}/{format}']
+  binding: rest
+  confidence: high
+- tool: find_decision
+  category: case-management
+  rest: ['POST /evaluation/sanctions/decisions/get_one/{decision_id}']
+  binding: rest
+  confidence: high
+- tool: find_decisions
+  category: case-management
+  rest: ['POST /evaluation/sanctions/decisions/get_many']
+  binding: rest
+  confidence: high
+- tool: update_decision
+  category: case-management
+  rest: ['POST /evaluation/sanctions/decisions/update_one']
+  binding: rest
+  confidence: high
+mcp_only:
+- tool: search_negative_news
+  reason: >-
+    Adverse-media screening with risk level, per-category findings and source URLs. No
+    equivalent GraphQL field or documented REST endpoint — the closest public surface is
+    the priced "Negative News" check on the rate card, which has no documented API path.
+- tool: search_gov_archive
+  reason: >-
+    Enigma Gov Archive (1.5B government records across 7,000+ datasets) is documented as
+    a data product and an MCP tool (guides/gov-archive); it exposes no documented GraphQL
+    field or REST endpoint of its own.
+rest_only:
+- capability: KYB legacy compatibility
+  paths: ['POST /v2/kyb-legacy/']
+  reason: Drop-in v1-shaped response for customers who cannot change their integration; no MCP tool.
+- capability: Screening watchlist view discovery
+  paths: ['GET /evaluation/sanctions/views']
+  reason: Configuration/discovery endpoint; no MCP tool exposes it.
+- capability: Screening stored configuration
+  paths: ['POST /evaluation/sanctions/configuration/{query_type}']
+  reason: Account-level configuration; no MCP tool.
+- capability: Screening batch processing
+  paths:
+  - 'POST /evaluation/sanctions/batch/start'
+  - 'POST /evaluation/sanctions/batch/status/{run_id}'
+  - 'POST /evaluation/sanctions/batch/results/{run_id}'
+  reason: File-based bulk screening, available on request; no MCP tool.
+graphql_only:
+- capability: List management
+  fields: [createList, updateList, deleteList, createListMaterialization, updateListMaterialization, cancelListMaterialization, createSuggestion]
+  reason: >-
+    The seven published GraphQL mutations manage saved lists and their materializations.
+    No MCP tool and no REST path exposes them.
+- capability: Aggregate counts
+  fields: [aggregate]
+  reason: Counting query over OPERATING_LOCATION; no MCP tool equivalent.
+- capability: Response-shaping directives
+  fields: [coalesce, compact, join, map, slice, lower, upper, trim, dateAccessible]
+  reason: >-
+    Server-side directives that reshape the GraphQL response. They have no analogue on
+    the REST or MCP surfaces at all.
+coverage:
+  tools_named: 16
+  tools_bound: 14
+  mcp_only: 2
+  graphql_bound_tools: 7
+  rest_bound_tools: 7
+  rest_paths_documented: 13
+  rest_paths_with_a_tool: 6
+  graphql_mutations_documented: 7
+  graphql_mutations_with_a_tool: 0
+  note: >-
+    Counts are of DOCUMENTED surface, not of an OpenAPI. The clearest divergence: the
+    entire GraphQL mutation surface (list management) and the entire screening
+    configuration/batch surface are unreachable from any agent tool.

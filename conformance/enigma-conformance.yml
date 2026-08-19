@@ -1,4 +1,4 @@
-generated: '2026-07-19'
+generated: '2026-08-14'
 method: searched
 source: https://www.enigma.com/legal/security
 docs: https://documentation.enigma.com/
@@ -13,18 +13,87 @@ standards:
   evidence: >-
     GraphQL Data API is "Standard GraphQL conforming to the GraphQL Specification" per the
     GraphQL guide
+- id: relay-connection-spec
+  conforms: true
+  evidence: >-
+    Every nested field is a *Connection with edges/node/cursor and
+    pageInfo{hasNextPage,hasPreviousPage,startCursor,endCursor}; first/after and
+    last/before cursor pagination, max page size 100
 - id: oauth2
   conforms: true
-  evidence: Remote MCP server authenticates with OAuth 2.1
+  evidence: >-
+    Remote MCP server authenticates with OAuth 2.1, authorization_code + refresh_token
+    grants, response_type code
+- id: oauth-pkce-rfc7636
+  conforms: true
+  evidence: 'code_challenge_methods_supported: ["S256"] in the authorization-server metadata'
+- id: rfc8414-oauth-authorization-server-metadata
+  conforms: true
+  evidence: >-
+    https://mcp.enigma.com/.well-known/oauth-authorization-server returns 200 with issuer,
+    authorization_endpoint, token_endpoint, registration_endpoint, jwks_uri,
+    revocation_endpoint and introspection_endpoint (probed 2026-08-14)
+- id: rfc9728-oauth-protected-resource-metadata
+  conforms: true
+  evidence: >-
+    https://mcp.enigma.com/.well-known/oauth-protected-resource returns 200, and an
+    unauthenticated tools/list returns 401 with
+    WWW-Authenticate: Bearer realm="mcp-server", resource_metadata="…" pointing at it
+- id: rfc7591-dynamic-client-registration
+  conforms: true
+  evidence: 'registration_endpoint: https://oauth.enigma.com/register advertised in AS metadata'
+- id: rfc7009-token-revocation
+  conforms: true
+  evidence: 'revocation_endpoint: https://oauth.enigma.com/revoke'
+- id: rfc7662-token-introspection
+  conforms: true
+  evidence: 'introspection_endpoint: https://oauth.enigma.com/introspect'
+- id: mcp-streamable-http
+  conforms: true
+  evidence: >-
+    Published server card declares transport streamable-http at https://mcp.enigma.com/mcp,
+    schema https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json
 - id: rfc9116-security-txt
   conforms: true
-  evidence: /.well-known/security.txt published with Contact, Policy, Expires, Canonical
-- id: cursor-pagination
+  evidence: /.well-known/security.txt published with Contact, Policy, Expires, Preferred-Languages, Canonical
+- id: llms-txt
   conforms: true
-  evidence: GraphQL connections use Relay-style first/after/pageInfo cursor pagination
+  evidence: https://www.enigma.com/llms.txt returns 200 text/plain with a real llms.txt document
+- id: content-signals
+  conforms: true
+  evidence: >-
+    robots.txt publishes "Content-Signal: ai-train=yes, search=yes, ai-input=yes" — an
+    explicit machine-readable AI usage grant
+- id: openid-connect
+  conforms: false
+  evidence: >-
+    scopes_supported is ["openid"] and the IdP is Amazon Cognito, but no OIDC discovery
+    document is served — /.well-known/openid-configuration 404s on both mcp.enigma.com and
+    oauth.enigma.com
+- id: openapi
+  conforms: false
+  evidence: >-
+    No OpenAPI/Swagger document on any host; every /openapi.json-style path on
+    api.enigma.com and documentation.enigma.com returns the Docusaurus HTML shell
 - id: rfc9457-problem-details
   conforms: false
-  evidence: REST/GraphQL errors do not use application/problem+json
+  evidence: >-
+    Three different bespoke JSON error envelopes across the GraphQL, KYB and Screening
+    APIs; no application/problem+json
+- id: rfc8594-sunset-header
+  conforms: false
+  evidence: No Sunset/Deprecation headers and no published deprecation policy
+- id: idempotency-key
+  conforms: false
+  evidence: No idempotency-key header or parameter documented on any surface
+- id: asyncapi
+  conforms: false
+  evidence: No event, streaming or webhook surface is published
+- id: a2a-agent-card
+  conforms: false
+  evidence: >-
+    /.well-known/agent-card.json and /.well-known/agent.json miss on every Enigma host
+    (404 on www and mcp; HTML shell on api/documentation) — probed 2026-08-14
 - id: iso-27001
   conforms: false
   evidence: not published on the security page
@@ -33,3 +102,15 @@ standards:
   evidence: not published
 compliance_programs:
 - SOC 2 Type 2
+compliance_practices:
+- Annual third-party penetration tests of the SaaS applications
+- TLS 1.2+ in transit, encryption at rest on all server storage
+- Employee background checks and recurring security training
+- Ongoing vulnerability scanning and IDS monitoring
+- Malware/virus scanning of all files uploaded to the Console file exchange
+regulatory_context:
+  note: >-
+    Enigma's KYB and screening products serve BSA/AML obligations and card-network
+    merchant-verification rules for its customers. Enigma is the data provider, not the
+    regulated filer; these are the regimes its customers operate under.
+  regimes_referenced: [BSA, AML, OFAC sanctions]

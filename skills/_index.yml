@@ -1,0 +1,58 @@
+generated: '2026-08-14'
+method: searched
+source: https://github.com/enigma-io/enigma-claude-plugins
+note: >-
+  Enigma publishes its own Agent Skills as a Claude Code plugin marketplace in the
+  first-party enigma-io GitHub org (repo enigma-claude-plugins, plugin "enigma-api"
+  v1.3.0, owner engineering@enigma.com). The three SKILL.md files below are saved
+  VERBATIM from that repo — they are the provider's own operating instructions, not
+  skills authored by API Evangelist. Supporting example/reference files
+  (examples/, references/, scripts/) stay in the provider repo and are not copied here.
+plugin:
+  marketplace: enigma-plugins
+  name: enigma-api
+  version: 1.3.0
+  category: integrations
+  owner_email: engineering@enigma.com
+  repo: https://github.com/enigma-io/enigma-claude-plugins
+  manifest: skills/enigma-claude-plugin-marketplace.json
+skills:
+- file: enigma-graphql.md
+  name: enigma-graphql
+  description: >-
+    Search and discover businesses using the Enigma GraphQL API — entity resolution by
+    name, semantic/industry discovery, person search, market segmentation, legal-entity
+    and corporate-structure lookups.
+  api: https://api.enigma.com/graphql
+  surface: graphql
+  operations:
+  - search
+  - aggregate
+  - backgroundTask
+  source: https://github.com/enigma-io/enigma-claude-plugins/blob/main/plugins/enigma-api/skills/enigma-graphql/SKILL.md
+- file: enigma-kyb.md
+  name: enigma-kyb
+  description: >-
+    Verify businesses using the Enigma KYB API — identity verification, registration
+    status, officer screening, and KYB due diligence.
+  api: https://api.enigma.com/v2/kyb/
+  surface: rest
+  operations:
+  - POST /v2/kyb/
+  source: https://github.com/enigma-io/enigma-claude-plugins/blob/main/plugins/enigma-api/skills/enigma-kyb/SKILL.md
+- file: enigma-screen.md
+  name: enigma-screen
+  description: >-
+    Screen persons and organizations against sanctions and PEP lists using the Enigma
+    Screening API. Explicitly scoped to compliance screening only.
+  api: https://api.enigma.com/evaluation/sanctions/
+  surface: rest
+  operations:
+  - POST /evaluation/sanctions/screen
+  - GET /evaluation/sanctions/views
+  source: https://github.com/enigma-io/enigma-claude-plugins/blob/main/plugins/enigma-api/skills/enigma-screen/SKILL.md
+x-evidence:
+  fetched: '2026-08-14'
+  repo_api: https://api.github.com/repos/enigma-io/enigma-claude-plugins
+  http_status: 200
+  repo_pushed_at: '2026-06-09T14:35:35Z'

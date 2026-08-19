@@ -1,42 +1,129 @@
-generated: '2026-07-19'
+generated: '2026-08-14'
 method: searched
 source: https://documentation.enigma.com/guides/graphql/api
 docs: https://documentation.enigma.com/
+surfaces:
+- {name: GraphQL Data API, base: 'https://api.enigma.com/graphql'}
+- {name: KYB v2 REST API, base: 'https://api.enigma.com/v2/kyb/'}
+- {name: Screening REST API, base: 'https://api.enigma.com/evaluation/sanctions/'}
+- {name: MCP server, base: 'https://mcp.enigma.com/mcp'}
 authentication:
   style: api-key-header
   header: x-api-key
+  additional_header:
+    name: Account-Name
+    applies_to: Screening API
+    required: true
+    note: >-
+      The Screening API requires BOTH x-api-key and Account-Name on every request — an
+      estate inconsistency: the GraphQL and KYB APIs take x-api-key alone.
+  mcp: OAuth 2.1 (authorization code + PKCE S256, dynamic client registration)
   see: authentication/enigma-authentication.yml
 pagination:
-  graphql:
+  graphql_connections:
     style: cursor
-    params: [first, last, after, before]
-    response_fields: [pageInfo.hasNextPage, pageInfo.endCursor]
-    note: Relay-style connection pagination on every connection field
-  graphql_conditions:
+    spec: Relay Connection specification
+    params: [first, last, after, before, conditions]
+    max_page_size: 100
+    response_fields:
+    - 'edges[].node'
+    - 'edges[].cursor'
+    - pageInfo.hasNextPage
+    - pageInfo.hasPreviousPage
+    - pageInfo.startCursor
+    - pageInfo.endCursor
+    constraint: first and last cannot be mixed in the same query.
+  graphql_search_conditions:
     style: offset
-    params: [limit, pageToken]
+    params: [limit, pageToken, orderBy]
     note: >-
-      Top-level search conditions also accept limit and a numeric pageToken (offset as a
-      string) plus orderBy [field ASC|DESC]
+      searchInput.conditions (type `Conditions`) takes limit + a numeric pageToken passed
+      as a STRING, and orderBy ["field ASC|DESC"]. Nested connections take
+      `ConnectionConditions`, which has no limit. Confusing the two is a documented 400.
+  graphql_search_root:
+    style: none
+    note: >-
+      Query.search returns the SearchUnion — a plain list, not a connection. It accepts no
+      first/after; pagination happens on connections inside each returned node.
+  screening_decisions:
+    style: page-number
+    params: [page, amt]
+    defaults: {page: 0, amt: 10}
+  kyb:
+    style: none
+    note: top_n query parameter caps returned matches (default 1).
 idempotency:
   supported: false
-  note: No idempotency-key header is documented for the GraphQL or KYB APIs.
-versioning:
-  scheme: uri-path
-  graphql: unversioned single endpoint (/graphql, graph-model-1)
-  kyb: v2 (/v2/kyb/)
-error_envelope:
+  header: null
+  note: >-
+    No idempotency-key header or parameter is documented on any of the four surfaces.
+    Reads dominate the estate, but the Screening API has genuinely non-idempotent writes
+    (decisions/update_one, batch/start, configuration/{query_type}) with no replay
+    protection, and every metered call bills on retry.
+  gap: true
+filtering:
+  location: conditions.filter
+  operators:
+    comparison: [EQ, NE, GT, GTE, LT, LTE]
+    set: [IN, NOT_IN]
+    string: [LIKE, ILIKE]
+    logical: [AND, OR, NOT]
+    existence: [HAS]
+    arithmetic: [ADD, SUB, MUL, DIV]
+  field_paths: dot notation (e.g. addresses.city, operatingStatuses.operatingStatus, cardTransactions.period)
+response_shaping:
+  directives: [coalesce, compact, dateAccessible, include, join, lower, map, skip, slice, trim, upper]
+  math_functions: [count, sum, min, max, avg, collect, minDateTime, maxDateTime]
+  note: >-
+    Server-side directives and aggregate functions let a client reshape and reduce a
+    response in-query. No equivalent exists on the REST or MCP surfaces.
+async:
   graphql:
-    shape: GraphQL errors[] array alongside partial data (per the GraphQL Specification)
-  kyb:
-    shape: HTTP status code + JSON body
+    trigger: searchInput.output {filename, format CSV|PARQUET, s3Path}
+    poll: 'backgroundTask(id: UUID) { status, result }'
+    statuses: [PROCESSING, SUCCESS, FAILED, CANCELLED]
+    accepted_status: 202
+  screening_batch:
+    start: 'POST /evaluation/sanctions/batch/start (multipart/form-data, .xlsx/.xls)'
+    poll: 'POST /evaluation/sanctions/batch/status/{run_id}'
+    results: 'POST /evaluation/sanctions/batch/results/{run_id}?type=raw|web_screen'
+    statuses: [QUEUED, STARTED, SUCCESS, FAILURE, CANCELED]
+    availability: on request
+  note: >-
+    Two async job models with two different status vocabularies (PROCESSING/CANCELLED vs
+    STARTED/CANCELED — note the spelling difference) across one estate.
+large_responses:
+  threshold: 6 MB
+  mechanism: 'HTTP 302 to a pre-signed AWS S3 URL in the Location header'
+  applies_to: GraphQL Data API
+  agent_note: A client that does not follow redirects gets an empty 302 for any large result.
+request_tracing:
+  headers: [x-amzn-requestid, x-amzn-trace-id]
+  body_fields: [request_id]
+  note: >-
+    AWS API Gateway request ids on GraphQL/KYB; a first-class request_id in Screening
+    responses that doubles as the decision ID; request_id in MCP error bodies.
+versioning:
+  see: lifecycle/enigma-lifecycle.yml
+  data_asset_header: x-enigma-data-asset-version
+error_envelope:
   see: errors/enigma-problem-types.yml
+  note: Three different envelope shapes across three APIs; not RFC 9457.
 rate_limits:
-  signaling: not-documented
-  note: "Docs state \"Rate limits apply per API key\" but do not publish headers or quotas."
+  signaling: documented
+  status: 429
+  header: Retry-After
+  see: rate-limits/enigma-rate-limits.yml
 matching:
   match_threshold:
     range: 0.0-1.0
-    note: minimum-confidence filter on GraphQL search and KYB requests
+    applies_to: [GraphQL search, KYB requests, Screening (alert_threshold/hit_threshold)]
+    note: >-
+      Confidence thresholds are a first-class, tunable convention across the whole estate.
+      Screening additionally exposes per-attribute weights (person_name, org_name, dob,
+      address, country_of_affiliation).
   kyb_packages: [identify, verify]
   kyb_addons: [tin_verification, watchlist_ofac_screening, ssn_verification]
+metadata:
+  supported: false
+  note: No customer-supplied metadata field on any surface; Screening offers `tag` and `caller_id` for correlation.

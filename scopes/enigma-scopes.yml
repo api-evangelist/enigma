@@ -1,0 +1,55 @@
+generated: '2026-08-14'
+method: probed
+source: https://mcp.enigma.com/.well-known/oauth-authorization-server
+docs: https://documentation.enigma.com/guides/ai-mcp
+applies_to: Enigma MCP server (https://mcp.enigma.com/mcp)
+note: >-
+  Enigma's OAuth surface exists only for the remote MCP server. The GraphQL Data API, KYB
+  v2 API and Screening API authenticate with a static x-api-key header and have no OAuth
+  or scope surface at all — see authentication/enigma-authentication.yml. Scopes below
+  are read verbatim from the RFC 8414 authorization-server metadata document; Enigma
+  publishes no human-facing scope/permission reference page.
+schemes:
+- name: oauth2.1
+  source: https://mcp.enigma.com/.well-known/oauth-authorization-server
+  issuer: https://oauth.enigma.com
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://oauth.enigma.com/authorize
+    tokenUrl: https://oauth.enigma.com/token
+    pkce: required
+    code_challenge_methods: [S256]
+  grant_types_supported: [authorization_code, refresh_token]
+  response_types_supported: [code]
+  response_modes_supported: [query, fragment]
+  token_endpoint_auth_methods_supported: [client_secret_basic]
+  registration_endpoint: https://oauth.enigma.com/register
+  dynamic_client_registration: true
+  revocation_endpoint: https://oauth.enigma.com/revoke
+  introspection_endpoint: https://oauth.enigma.com/introspect
+  jwks_uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_00OC0VOa2/.well-known/jwks.json
+  identity_provider: Amazon Cognito (us-east-1)
+  service_documentation: https://modelcontextprotocol.io/authorization
+scopes:
+- scope: openid
+  description: >-
+    The only scope advertised in scopes_supported. Enigma does not publish granular
+    per-tool or per-dataset scopes; authorization is coarse-grained at the identity level
+    and entitlement is enforced by account plan and per-tool rate limits rather than by
+    OAuth scope.
+  flows: [authorizationCode]
+  sources: [https://mcp.enigma.com/.well-known/oauth-authorization-server]
+protected_resource:
+  source: https://mcp.enigma.com/.well-known/oauth-protected-resource
+  resource: https://mcp.enigma.com/http
+  authorization_servers: [https://oauth.enigma.com]
+x-evidence:
+  fetched: '2026-08-14'
+  urls:
+  - {url: 'https://mcp.enigma.com/.well-known/oauth-authorization-server', http_status: 200}
+  - {url: 'https://mcp.enigma.com/.well-known/oauth-protected-resource', http_status: 200}
+  - {url: 'https://oauth.enigma.com/.well-known/oauth-authorization-server', http_status: 200}
+  - {url: 'https://oauth.enigma.com/.well-known/openid-configuration', http_status: 404}
+  files:
+  - well-known/enigma-mcp-oauth-authorization-server.json
+  - well-known/enigma-mcp-oauth-protected-resource.json

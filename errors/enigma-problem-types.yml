@@ -1,39 +1,109 @@
-generated: '2026-07-19'
-method: derived
-source: https://documentation.enigma.com/guides/graphql/api
-docs: https://documentation.enigma.com/reference/response-status-codes
-format: graphql-errors + http-status
-note: >-
-  Enigma publishes a "Response Status Codes" reference page, but its content is served by a
-  Docusaurus SPA and was not machine-readable at harvest time. The entries below are
-  derived from the documented request/response conventions (x-api-key auth, GraphQL error
-  envelope, per-key rate limits). Titles/remediation should be upgraded from the docs page
-  on a later pass.
+generated: '2026-08-14'
+method: searched
+source: https://documentation.enigma.com/guides/graphql/response-status-codes
+docs: https://documentation.enigma.com/guides/graphql/response-status-codes
+docs_last_updated: '2026-07-02'
+format: http-status + per-api json envelope
+format_note: >-
+  Not RFC 9457. Enigma returns three DIFFERENT error envelopes across its three APIs, all
+  observed live on 2026-08-14, plus the GraphQL Specification errors[] array on 200
+  responses. An agent cannot use one parser across the estate.
 envelopes:
 - api: GraphQL Data API
-  shape: >-
-    GraphQL Specification errors[] array (each with message and optional extensions)
-    returned alongside any partial data field
+  base: https://api.enigma.com/graphql
+  shape: '{"error_message": string, "error_code": string, "retryable": boolean}'
+  observed: '{"error_message":"Missing or invalid API key","error_code":"UNAUTHORIZED","retryable":false}'
+  observed_status: 401
+  observed_at: '2026-08-14'
+  note: >-
+    Carries a machine-readable `retryable` boolean — the single most agent-useful field
+    in Enigma's error surface. On a 200, GraphQL Specification errors[] may still be
+    present alongside partial data.
 - api: KYB REST API
-  shape: HTTP status code with a JSON body
+  base: https://api.enigma.com/v2/kyb/
+  shape: '{"error": boolean, "message": string}'
+  observed: '{"error":true,"message":"Unauthorized"}'
+  observed_status: 401
+  observed_at: '2026-08-14'
+  note: 'A 404 on an unknown KYB path returns {"error":true,"message":"task not found"}.'
+- api: Screening API
+  base: https://api.enigma.com/evaluation/sanctions/
+  shape: JSON body with an error message and an appropriate HTTP status code
+  observed: null
+  note: >-
+    Documented shape only ("error responses include an error message and appropriate HTTP
+    status code"); no error body was observed anonymously.
 problems:
 - status: 200
   title: OK
-  detail: Request succeeded; GraphQL responses may still carry errors[] with partial data.
+  detail: >-
+    Successful request. GraphQL responses may still carry an errors[] array with partial
+    data.
+  api: all
+- status: 202
+  title: Accepted
+  detail: Asynchronous request accepted; poll backgroundTask(id) for status and result.
+  api: GraphQL Data API
+- status: 302
+  title: Found
+  detail: >-
+    Responses over 6 MB are delivered via redirect to a pre-signed AWS S3 URL in the
+    Location header. Most HTTP clients follow this automatically; a GET on the provided
+    URL also works.
+  api: GraphQL Data API
+  agent_note: >-
+    A client configured not to follow redirects will silently receive an empty 302 for any
+    large result set.
 - status: 400
   title: Bad Request
   detail: >-
-    Malformed query or invalid input (e.g. GraphQL search missing id/name/website, or a KYB
-    request without at least two of name/address/person).
+    Invalid or unsupported input. Additional detail may appear in the body under errors.
+    Common causes documented in Enigma's own Agent Skill: querying `edges` on the
+    SearchUnion returned by `search`, or selecting a scalar directly on a *Connection
+    type instead of traversing edges/node.
+  api: GraphQL Data API
 - status: 401
   title: Unauthorized
-  detail: Missing or invalid x-api-key header.
-- status: 403
-  title: Forbidden
-  detail: API key lacks access to the requested package, attribute, or dataset.
+  detail: Missing x-api-key request header, or the key is invalid or disabled.
+  api: all
+  observed: true
+- status: 402
+  title: Payment Required
+  detail: >-
+    Billing error such as insufficient credits. Add more credits through billing. Distinct
+    from a rate limit — the account is metered out, not throttled.
+  api: GraphQL Data API
 - status: 429
-  title: Too Many Requests
-  detail: Per-API-key rate limit exceeded.
-- status: 500
-  title: Internal Server Error
-  detail: Unexpected server-side error.
+  title: Too Many Requests / Slow Down
+  detail: >-
+    Per-second, burst, or daily plan rate limit exceeded, or an MCP per-tool daily/monthly
+    limit. Every 429 carries a Retry-After header with the seconds to wait.
+  api: all
+  see: rate-limits/enigma-rate-limits.yml
+mcp_errors:
+- status: 401
+  code: invalid_token
+  detail: 'Missing or invalid authorization header on https://mcp.enigma.com/mcp.'
+  www_authenticate: 'Bearer realm="mcp-server", resource_metadata="https://mcp.enigma.com/.well-known/oauth-protected-resource"'
+  observed_at: '2026-08-14'
+  note: >-
+    A correct RFC 9728 challenge — the response points the client at the protected-resource
+    metadata document so an agent can discover the authorization server unaided.
+  body_fields: [error, error_description, request_id]
+tracing:
+  graphql_and_kyb:
+    header: x-amzn-requestid
+    note: AWS API Gateway request id returned on every response; also x-amzn-trace-id.
+  screening:
+    field: request_id
+    note: UUID in the screening response body; it is also the decision ID used by the decisions endpoints.
+  mcp:
+    field: request_id
+    note: Present in MCP error bodies.
+x-evidence:
+  fetched: '2026-08-14'
+  probes:
+  - {url: 'https://api.enigma.com/graphql', method: POST, http_status: 401}
+  - {url: 'https://api.enigma.com/v2/kyb/', method: POST, http_status: 401}
+  - {url: 'https://api.enigma.com/v2/kyb/openapi.json', method: GET, http_status: 404}
+  - {url: 'https://mcp.enigma.com/mcp', method: POST, http_status: 401}

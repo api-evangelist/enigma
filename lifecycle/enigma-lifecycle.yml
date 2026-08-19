@@ -1,23 +1,109 @@
-generated: '2026-07-19'
+generated: '2026-08-14'
 method: searched
 source: https://documentation.enigma.com/
+docs:
+- https://documentation.enigma.com/kyb
+- https://documentation.enigma.com/v1/reference/apis/
+- https://documentation.enigma.com/reference/graphql_api
 status_page: https://status.enigma.com/
+status_page_api: https://status.enigma.com/api/v2/summary.json
+status_page_platform: Atlassian Statuspage
+status_components:
+- Console
+- GraphQL API
+- Business API
+- Screen API
+- KYB Service v1
+- KYB Service v2
+- TIN Verification
+- Watchlist Screening
+- MCP
 versioning:
   graphql:
     scheme: unversioned
     model: graph-model-1
     endpoint: https://api.enigma.com/graphql
+    data_asset_version_header: x-enigma-data-asset-version
+    data_asset_version_observed: release_master_fast_er_20260728
+    data_asset_note: >-
+      Every GraphQL response carries x-enigma-data-asset-version identifying the
+      underlying data release (observed 2026-08-14). The API contract is unversioned; the
+      DATA is versioned and surfaced per response. That is the only version signal a
+      client gets.
   kyb:
     scheme: uri-path
     current: v2
     endpoint: https://api.enigma.com/v2/kyb/
+    legacy_compat_endpoint: https://api.enigma.com/v2/kyb-legacy/
+    legacy_compat_note: >-
+      A drop-in replacement that keeps the v1 response shape while returning improved v2
+      data, for integrations that cannot change. A real, documented migration off-ramp.
+  screening:
+    scheme: uri-path-namespace
+    endpoint: https://api.enigma.com/evaluation/sanctions/
+  v1_legacy:
+    scheme: uri-path
+    status: legacy
+    endpoints:
+    - 'POST /businesses/match'
+    - 'GET /businesses/{id}'
+    - 'POST /v1/kyb'
+    docs: https://documentation.enigma.com/v1/reference/apis/
+    banner: >-
+      "This is legacy documentation maintained for existing customers only. New
+      implementations should use our contemporary platform powered by graph-model-1."
 deprecation:
   policy_url: null
   sunset_header: false
-  note: No public deprecation policy or RFC 8594 Sunset/Deprecation header support documented.
+  sunset_dates_published: false
+  note: >-
+    Enigma runs a real two-generation migration (v1 → graph-model-1 / KYB v2, with a
+    kyb-legacy compatibility endpoint and a documented "Migrating from KYB v1?" path) and
+    marks two GraphQL queries deprecated in its own reference — but it publishes NO
+    written deprecation policy, no notice period, no sunset date, and no RFC 8594
+    Sunset/Deprecation headers. The migration is documented; the commitment is not.
+  legacy_surfaces_still_listed_on_status_page:
+  - Business API
+  - KYB Service v1
+deprecated_operations:
+- surface: graphql
+  name: getListMaterialization
+  docs: https://documentation.enigma.com/reference/graphql_api/deprecated/queries/get-list-materialization
+- surface: graphql
+  name: searchLists
+  docs: https://documentation.enigma.com/reference/graphql_api/deprecated/queries/search-lists
+changelog:
+  published: false
+  probe:
+    url: https://documentation.enigma.com/changelog
+    http_status: 200
+    result: >-
+      Docusaurus catch-all — serves the docs Overview page, not a changelog. Same for
+      /release-notes. Neither path appears in the documentation sitemap and no dated
+      changelog exists anywhere on documentation.enigma.com or www.enigma.com.
+  substitute: >-
+    Each documentation page carries a "Last updated on <date>" stamp, which is the only
+    dated change signal Enigma publishes.
 sla:
   url: null
-  note: No public SLA / uptime target published; availability is tracked on the status page.
+  note: >-
+    No public SLA or uptime target. The pricing page lists "Contract SLA and dedicated
+    support" as an Enterprise-plan feature, so an SLA exists contractually but is not
+    published.
+pricing_lifecycle:
+  changed: '2026-08-10'
+  free_trial_ends: '2026-08-31'
+  note: >-
+    A pricing generation change with a published transition: pre-2026-08-10 accounts keep
+    the old pricing (still published for reference), trials end 2026-08-31, and extra
+    credits convert 5:1. See plans/enigma-plans-pricing.yml.
 support:
   email: support@enigma.com
   url: https://www.enigma.com/company/support
+  engineering_contact: engineering@enigma.com
+x-evidence:
+  fetched: '2026-08-14'
+  probes:
+  - {url: 'https://status.enigma.com/api/v2/summary.json', http_status: 200}
+  - {url: 'https://documentation.enigma.com/changelog', http_status: 200}
+  - {url: 'https://documentation.enigma.com/v1/reference/apis/', http_status: 200}

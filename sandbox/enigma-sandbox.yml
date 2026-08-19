@@ -1,0 +1,84 @@
+generated: '2026-08-14'
+method: searched
+source: https://documentation.enigma.com/screening/api/views
+docs:
+- https://documentation.enigma.com/screening/api/views
+- https://documentation.enigma.com/guides/ai-mcp
+summary: >-
+  Enigma has no separate sandbox host and no test/live key split — the same x-api-key and
+  the same api.enigma.com hosts serve production data on every plan. What it does publish
+  is (a) a free Console tier where browsing, search and live summaries cost nothing, (b) a
+  browser GraphQL explorer, and (c) a named testing watchlist view for integrating against
+  the Screening API without hitting a real sanctions list.
+test_live_separation:
+  supported: false
+  key_prefixes: null
+  note: >-
+    One API key per account, issued from the Enigma Console. No documented test-mode key,
+    no key prefix convention, no sandbox base URL. Billing is metered per returned fill,
+    so integration testing consumes real credits except where noted below.
+consoles:
+- name: Enigma Console
+  url: https://console.enigma.com/
+  description: >-
+    Browse, search and preview the business graph. On the Free plan viewing, search and
+    live summaries cost no credits within standard rate limits, which is the closest
+    thing to a no-cost evaluation surface.
+- name: GraphQL Explorer
+  url: https://console.enigma.com/explore/graphql
+  description: >-
+    In-browser GraphQL playground for the Data API. Named as the playground in Enigma's
+    own enigma-graphql Agent Skill.
+- name: Agent tools page (Console)
+  url: https://console.enigma.com/
+  description: >-
+    Per the MCP guide, the Console's Agent tools page renders copy-paste MCP client
+    configuration with the account's API key pre-filled for Claude Code, Cursor, VS Code
+    and Gemini CLI.
+test_fixtures:
+- surface: Screening API
+  kind: watchlist-view
+  value: enigma/testing
+  description: >-
+    "Testing list for development and integration" — a published view ID that can be
+    passed in configuration_overrides.list_groups to screen against a test list instead
+    of a live sanctions list.
+  source: https://documentation.enigma.com/screening/api/views
+  verbatim: true
+- surface: Screening API
+  kind: worked-example
+  value: 'ofac/sdn/43085 (JOHN DESMOND HANAFIN, dob 19740710, Ireland)'
+  description: >-
+    The entity used throughout Enigma's published screening request/response examples,
+    including the entity-lookup example
+    POST /evaluation/sanctions/entity/ofac/sdn/43085/structured. It is a real OFAC SDN
+    record, not a synthetic fixture — recorded because it is the provider's own worked
+    example, not because it is safe test data.
+  source: https://documentation.enigma.com/screening/api/core-endpoints
+  verbatim: true
+- surface: GraphQL Data API
+  kind: worked-example
+  value: 'Brand id 5f1147ed-8e99-477d-827a-51094b2de153 (STARBUCKS)'
+  description: >-
+    The Brand ID used in every quickstart example, usable as a known-good input when
+    validating a GraphQL integration.
+  source: https://documentation.enigma.com/guides/graphql/api
+  verbatim: true
+time_simulation:
+  supported: false
+fixture_tooling:
+- name: validate_query.py
+  description: >-
+    Query validator shipped inside Enigma's own enigma-graphql Agent Skill, used to check
+    a GraphQL query's shape before sending it.
+  url: https://github.com/enigma-io/enigma-claude-plugins/blob/main/plugins/enigma-api/skills/enigma-graphql/scripts/validate_query.py
+- name: enigma-kyb-evaluation
+  description: >-
+    First-party evaluation harness with sample input CSVs (sample_file.csv,
+    sample_file_tin.csv) for batch-testing KYB match quality.
+  url: https://github.com/enigma-io/enigma-kyb-evaluation
+  last_pushed: '2024-05-10'
+- name: enigma-mcp-examples
+  description: First-party example repo for the remote MCP server.
+  url: https://github.com/enigma-io/enigma-mcp-examples
+  last_pushed: '2025-08-13'

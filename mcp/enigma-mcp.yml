@@ -1,28 +1,169 @@
-generated: '2026-07-19'
+generated: '2026-08-14'
 method: searched
 status: published
 source: https://www.enigma.com/.well-known/mcp/server-card.json
 docs: https://documentation.enigma.com/guides/ai-mcp
+tools_source: https://documentation.enigma.com/guides/ai-mcp/tools
+maturity: beta
+maturity_note: 'Enigma labels the remote MCP server "currently in beta" on every MCP docs page.'
 server:
   name: com.enigma/enigma-mcp
   title: Enigma MCP
-  version: '1.0.0'
+  version: 1.0.0
   transport: streamable-http
   url: https://mcp.enigma.com/mcp
   auth: oauth2.1
   card: mcp/enigma-mcp-server-card.json
-  description: >-
-    Remote MCP server for U.S. business intelligence: entity resolution, KYB verification,
-    sanctions and negative-news screening, card-transaction analytics, and public-records
-    search. Returns structured entity data rather than web content and handles entity
-    resolution server-side under OAuth-scoped access.
+  description: 'Remote MCP server for U.S. business intelligence: entity resolution, KYB verification,
+    sanctions and negative-news screening, card-transaction analytics, and public-records search. Returns
+    structured entity data rather than web content and handles entity resolution server-side under OAuth-scoped
+    access.'
+deployment:
+  mode: both
+  endpoint: https://mcp.enigma.com/mcp
+  install: npx -y @enigma-com/enigma-mcp-remote https://mcp.enigma.com/mcp
+  package: https://www.npmjs.com/package/@enigma-com/enigma-mcp-remote
+  auth: oauth
+  verified: probed
+  note: >-
+    mode is `both`: the hosted streamable-HTTP endpoint is directly callable by any MCP
+    client that speaks remote transport, AND Enigma publishes its own stdio bridge
+    (@enigma-com/enigma-mcp-remote, npm, v0.1.20) for local-only clients. The stdio
+    package is a transport proxy to the same remote endpoint, not a second server.
 capabilities:
 - business identity resolution
 - KYB verification
 - sanctions and negative-news screening
 - card-transaction analytics
 - public-records search
+- screening decision / case management
 clients:
 - Claude
+- Claude Code
 - ChatGPT
 - Cursor
+- VS Code
+- Gemini CLI
+- OpenAI Playground
+- MS Copilot
+tool_count: 16
+tools_schema_status: gated
+tools:
+- name: search_business
+  category: business-intelligence
+  description: >-
+    Find a business and return revenue (12m), transaction count (12m), YoY growth, NAICS
+    codes and industry, technology stack, location count and samples, matching brands and
+    matching legal entities.
+  inputs: 'Business name (required); website/phone/address (optional)'
+- name: search_person
+  category: business-intelligence
+  description: >-
+    Find a person and return known names, associated legal-entity roles, registered
+    entities, registrations, public business registration addresses, related brands and
+    Person IDs.
+  inputs: 'Person name or Person ID (required); location/phone filters, focus (optional)'
+- name: get_brand_locations
+  category: business-intelligence
+  description: Full street addresses, 12m card revenue per location, and lat/lng coordinates.
+  inputs: Enigma Brand ID (required)
+- name: get_brand_card_analytics
+  category: business-intelligence
+  description: >-
+    Past 60 months of card transaction data — revenue, YoY growth, average daily
+    customers, transaction count, average transaction amount, refunds.
+  inputs: Enigma Brand ID (required)
+- name: get_brand_legal_entities
+  category: business-intelligence
+  description: >-
+    All legal entities linked to a brand with Legal Entity IDs, state-by-state
+    registrations, active/inactive status, formation dates, DBA names, filing numbers and
+    domestic-vs-foreign patterns.
+  inputs: Enigma Brand ID (required)
+- name: search_negative_news
+  category: risk
+  description: >-
+    Risk level and detailed findings by category — legal, financial, labor, management,
+    environmental, customer complaints, product recalls, cybersecurity — with source URLs.
+  inputs: 'Business name (required), business address (required)'
+- name: search_gov_archive
+  category: public-records
+  description: >-
+    Business registrations, permits and licenses, health inspections and violations,
+    court filings and liens, environmental records, professional licensing.
+  inputs: 'Business name (required), prompt context (recommended)'
+- name: search_kyb
+  category: kyb
+  description: >-
+    Matching brands and registered legal entities plus address and name verification
+    (Secretary-of-State-specific or any source).
+  inputs: 'Business name (required), business address (optional)'
+- name: generate_brands_segment
+  category: segmentation
+  description: Generate a filtered brand segment for competitive and market analysis.
+  inputs: not published on the tools page
+  source_note: >-
+    Named only in the published MCP rate-limit table
+    (https://documentation.enigma.com/resources/rate-limits), which lists per-tool daily
+    and monthly limits; the tools page does not document its inputs/outputs.
+- name: generate_locations_segment
+  category: segmentation
+  description: Generate a filtered operating-location segment for expansion and site analysis.
+  inputs: not published on the tools page
+  source_note: Named only in the published MCP rate-limit table.
+- name: screen_customer
+  category: screening
+  description: >-
+    Screen an individual against sanctions/watchlists. Returns match confidence scores,
+    potential matches with detail, hit/alert status and source list information (SDN,
+    Non-SDN, etc.).
+  inputs: 'Name (required); DOB, country, passport info (optional)'
+- name: screen_business
+  category: screening
+  description: Screen an organization against global sanctions lists.
+  inputs: 'Org name (required); country, address, BIC (optional)'
+- name: screen_entity_search
+  category: screening
+  description: Full entity profile from sanctions lists with all available attributes.
+  inputs: 'Entity ID (required); format (optional)'
+- name: find_decision
+  category: case-management
+  description: Decision details including status, assignee, alert status, tags and notes.
+  inputs: Request ID (required)
+- name: find_decisions
+  category: case-management
+  description: Paginated list of screening decisions with filters.
+  inputs: 'Date range, status, alert, assignee, tag (all optional)'
+- name: update_decision
+  category: case-management
+  description: Update a screening decision and return confirmation.
+  inputs: 'Request ID (required), User ID (required); status/assignee/note (optional)'
+x-evidence:
+  fetched: '2026-08-14'
+  tools_list_probe:
+    url: https://mcp.enigma.com/mcp
+    method: 'POST {"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+    http_status: 401
+    body: '{"error":"invalid_token","error_description":"Missing or invalid authorization header"}'
+    www_authenticate: 'Bearer realm="mcp-server", resource_metadata="https://mcp.enigma.com/.well-known/oauth-protected-resource"'
+    conclusion: >-
+      Live tools/list is OAuth-gated, so per-tool inputSchema could not be introspected
+      anonymously. The 16 tools above are the provider's OWN published list (docs tools
+      page + MCP rate-limit table) with names and descriptions only; input schemas
+      require authenticated introspection. The 401 is a correct RFC 9728 challenge — it
+      names the protected-resource metadata document.
+  initialize_probe:
+    http_status: 401
+  oauth_protected_resource:
+    url: https://mcp.enigma.com/.well-known/oauth-protected-resource
+    http_status: 200
+    file: ../well-known/enigma-mcp-oauth-protected-resource.json
+  oauth_authorization_server:
+    url: https://mcp.enigma.com/.well-known/oauth-authorization-server
+    http_status: 200
+    file: ../well-known/enigma-mcp-oauth-authorization-server.json
+see_also:
+- mcp/enigma-tool-crosswalk.yml
+- scopes/enigma-scopes.yml
+- rate-limits/enigma-rate-limits.yml
+- packages/enigma-packages.yml

@@ -1,0 +1,109 @@
+generated: '2026-08-14'
+method: searched
+source: >-
+  registry.npmjs.org, pypi.org/pypi/*/json, api.github.com/orgs/enigma-io — probed
+  2026-08-14
+sdk_posture: >-
+  Enigma ships NO current first-party client SDK for the GraphQL Data API, the KYB v2
+  REST API, or the Screening API. Every code sample in the documentation and in Enigma's
+  own Agent Skills uses raw HTTP (Python urllib / requests / curl). The only currently
+  maintained first-party packages are agent-tooling: an MCP stdio proxy and a Claude Code
+  plugin. The two Python packages that ARE client libraries were published for Enigma
+  Public, a retired open-data product, and have not been released since 2018. No `SDKs`
+  pointer is emitted in apis.yml for that reason — recording one would credit Enigma with
+  client libraries it does not currently ship.
+packages:
+- language: javascript
+  registry: npm
+  name: "@enigma-com/enigma-mcp-remote"
+  url: https://www.npmjs.com/package/@enigma-com/enigma-mcp-remote
+  install: npx -y @enigma-com/enigma-mcp-remote
+  official: true
+  kind: mcp-stdio-proxy
+  version: 0.1.20
+  published: '2025-08-13'
+  release_count: 3
+  license: MIT
+  repository: https://github.com/enigma-io/enigma-mcp-remote
+  description: >-
+    Remote proxy for Model Context Protocol, allowing local-only clients to connect to
+    remote servers using OAuth. A fork of Glen Maddern's mcp-remote, republished under
+    Enigma's own npm scope; binaries enigma-mcp-remote and enigma-mcp-remote-client.
+  note: >-
+    This is a transport bridge for MCP clients that cannot speak streamable-HTTP — not an
+    API client library. It does not wrap the GraphQL, KYB, or Screening APIs.
+- language: python
+  registry: github
+  name: enigma-api (Claude Code plugin)
+  url: https://github.com/enigma-io/enigma-claude-plugins
+  install: /plugin marketplace add enigma-io/enigma-claude-plugins
+  official: true
+  kind: agent-skill-plugin
+  version: 1.3.0
+  published: '2026-06-09'
+  published_basis: repository pushed_at (no package registry; distributed from GitHub)
+  license: null
+  description: >-
+    Claude Code plugin marketplace publishing three Enigma Agent Skills (enigma-graphql,
+    enigma-kyb, enigma-screen) plus query examples, filter/pagination references and a
+    validate_query.py script.
+  note: >-
+    Distributed from the git repo, not a package registry, so there is no registry
+    metadata endpoint to query; `version` is read from .claude-plugin/marketplace.json
+    and `published` from the GitHub repo's pushed_at. See skills/_index.yml.
+- language: python
+  registry: pypi
+  name: enigma-sdk
+  url: https://pypi.org/project/enigma-sdk/
+  install: pip install enigma-sdk
+  official: true
+  kind: legacy-client
+  version: 1.0.4
+  published: '2018-10-15'
+  description: Enigma Public SDK
+  homepage: https://public.enigma.com/
+  note: >-
+    First-party client for Enigma Public, the company's retired open-data platform. Last
+    released 2018-10-15 — roughly eight years before the current graph-model-1 GraphQL
+    API it does not cover. Recorded as decay evidence, not as a usable SDK.
+- language: python
+  registry: pypi
+  name: enigma
+  url: https://pypi.org/project/enigma/
+  install: pip install enigma
+  official: true
+  kind: legacy-client
+  version: '0.1'
+  published: null
+  description: A Python client for Enigma's Public, Assembly, and Concourse products.
+  repository: https://github.com/enigma-io/enigma-client-python
+  note: >-
+    Checked 2026-08-14: PyPI answers 200 for the project and reports version 0.1, but the
+    releases map for 0.1 contains no distribution files, so no upload date exists to
+    record — `published: null` means checked-and-nothing-to-record, not unchecked. Covers
+    Enigma Public / Assembly / Concourse, all retired.
+excluded_candidates:
+- name: enigma-sdk (npm)
+  url: https://www.npmjs.com/package/enigma-sdk
+  reason: >-
+    npm package of the same name (v1.0.31, 2024-03-20) carries no description, no
+    repository and no homepage; nothing ties it to Enigma Technologies. Not recorded as
+    first-party.
+- name: enigma / enigma-cli / enigma-api (npm)
+  reason: >-
+    Unrelated projects (an Enigma-machine implementation, a coding-agent CLI, an x402
+    payment client). Name collision only.
+registries_checked:
+  npm: searched
+  pypi: searched
+  github: searched
+  rubygems: not-published
+  maven-central: not-published
+  nuget: not-published
+  crates-io: not-published
+  packagist: not-published
+  pkg-go-dev: not-published
+github_org: https://github.com/enigma-io
+see_also:
+- mcp/enigma-mcp.yml
+- skills/_index.yml
